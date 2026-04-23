@@ -38,6 +38,8 @@
 /* Motor control pin masks (ODR/BSRR bit values) */
 #define COILS         0xF          // Pins 0-3 (one for each motor coil)
 
+/* Motor control sequence array */
+#define Motor_Drive [0x7, 0x3, 0xB, 0x9, 0xD, 0xC, 0xE, 0x6]
 /* lcd.c function declarations */
 void Motor_Config( void );                                    // configure PC8 as LED output
 void LCD_init( void );                                      // initialize LCD in 4-bit mode
