@@ -42,17 +42,8 @@
 #define Motor_Drive [0x7, 0x3, 0xB, 0x9, 0xD, 0xC, 0xE, 0x6]
 /* lcd.c function declarations */
 void Motor_Config( void );                                    // configure PC8 as LED output
-void LCD_init( void );                                      // initialize LCD in 4-bit mode
-void LCD_pulse_ENA( void );                                 // generate EN falling edge pulse
-void LCD_4b_command( uint8_t command );                     // send high nibble only (wake-up)
-void LCD_command( uint8_t command );                        // send full byte in 4-bit mode
-void LCD_write_char( uint8_t letter );                      // write single ASCII character
-void LCD_write_string( char string[] );                     // write null-terminated string
-void LCD_set_cursor( uint8_t row, uint8_t column );         // set DDRAM address by row/column
-void LCD_write_intro_message( void );                       // display EE329 A3 TIMER intro
-void Prompt_user_4_numbers( void );                         // display digit entry prompt
-void Update_entered_numbers( uint8_t nums[4], uint8_t currentCnt ); // update LCD with each digit press
-void Wait_for_4_User_Digits( uint8_t lcd_In[4] );           // block until 4 digits entered
-void Update_time( uint8_t lcd_In[4] );                      // update LCD countdown display
+void Spin_360_Motor( void );   
+void Spin_90_Motor( void )                                   // initialize LCD in 4-bit mode
+
 
 #endif /* INC_LCD_H_ */

@@ -64,6 +64,10 @@ void Motor_Config(void){
   M2_PORT -> BRR     |=  (0xF);
 }
 
-void Spin_Motor(void){
-  
+void Spin_360_Motor(void){
+
+}
+
+void Spin_90_Motor(void){
+
 }
