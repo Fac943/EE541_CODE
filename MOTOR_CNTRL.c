@@ -29,14 +29,38 @@
  * date     : 4/22/2026
  * usage    : called in main.c before main loop
  *----------------------------------------------------------------------------*/
-void LED_Config(void){
-
-	M1_PORT  -> MODER   &= ~(GPIO_MODER_MODE8);         // clear mode bits PC8
-	M1_PORT  -> MODER   |=  (GPIO_MODER_MODE8_0);       // set PC8 as GP output
-	M1_PORT -> OTYPER  &= ~(GPIO_OTYPER_OT8);          // push-pull output
-	M1_PORT -> PUPDR   &= ~(GPIO_PUPDR_PUPD8);         // no pull-up/pull-down
-	M1_PORT -> OSPEEDR |=  (3 << GPIO_OSPEEDR_OSPEED8_Pos); // very high speed
-	M1_PORT -> BRR     |=  (GPIO_PIN_8);               // preset LED off (LO)
-
+void Motor_Config(void){
+  //clear mode register pits for pins 0-3 in Port C and A
+	M1_PORT  -> MODER   &= ~(GPIO_MODER_MODE0 | GPIO_MODER_MODE1 
+                          | GPIO_MODER_MODE2 | GPIO_MODER_MODE3); 
+	M2_PORT  -> MODER   &= ~(GPIO_MODER_MODE0 | GPIO_MODER_MODE1 
+                          | GPIO_MODER_MODE2 | GPIO_MODER_MODE3); 
+  //set pins 0-3 in port C and A to output mode
+  M1_PORT  -> MODER   |=  (GPIO_MODER_MODE0_0 | GPIO_MODER_MODE1_0
+                          | GPIO_MODER_MODE2_0 | GPIO_MODER_MODE3_0);     
+  M2_PORT  -> MODER   |=  (GPIO_MODER_MODE0_0 | GPIO_MODER_MODE1_0
+                          | GPIO_MODER_MODE2_0 | GPIO_MODER_MODE3_0);  
+  // set pins 0-3 in port C and A to push-pull outputs
+	M1_PORT  -> OTYPER  &= ~(GPIO_OTYPER_OT0 | GPIO_OTYPER_OT1 |
+                           GPIO_OTYPER_OT2 | GPIO_OTYPER_OT3 );          
+  M2_PORT  -> OTYPER  &= ~(GPIO_OTYPER_OT0 | GPIO_OTYPER_OT1 |
+                           GPIO_OTYPER_OT2 | GPIO_OTYPER_OT3 );  
+  // no pull-up/pull-down
+	M1_PORT  -> PUPDR   &= ~(GPIO_PUPDR_PUPD0 | GPIO_PUPDR_PUPD1 | 
+                           GPIO_PUPDR_PUPD2 | GPIO_PUPDR_PUPD3);         
+  M2_PORT  -> PUPDR   &= ~(GPIO_PUPDR_PUPD0 | GPIO_PUPDR_PUPD1 | 
+                           GPIO_PUPDR_PUPD2 | GPIO_PUPDR_PUPD3); 
+  // very high speed outputs           
+	M1_PORT -> OSPEEDR |=  (3 << GPIO_OSPEEDR_OSPEED0_Pos | 
+                          3 << GPIO_OSPEEDR_OSPEED1_Pos
+                          3 << GPIO_OSPEEDR_OSPEED2_Pos
+                          3 << GPIO_OSPEEDR_OSPEED3_Pos); 
+  M2_PORT -> OSPEEDR |=  (3 << GPIO_OSPEEDR_OSPEED0_Pos | 
+                          3 << GPIO_OSPEEDR_OSPEED1_Pos
+                          3 << GPIO_OSPEEDR_OSPEED2_Pos
+                          3 << GPIO_OSPEEDR_OSPEED3_Pos);
+  // preset both motors off
+	M1_PORT -> BRR     |=  (0xF);  
+  M2_PORT -> BRR     |=  (0xF);
 }
 	

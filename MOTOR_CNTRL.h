@@ -39,7 +39,7 @@
 #define COILS         0xF          // Pins 0-3 (one for each motor coil)
 
 /* lcd.c function declarations */
-void LED_Config( void );                                    // configure PC8 as LED output
+void Motor_Config( void );                                    // configure PC8 as LED output
 void LCD_init( void );                                      // initialize LCD in 4-bit mode
 void LCD_pulse_ENA( void );                                 // generate EN falling edge pulse
 void LCD_4b_command( uint8_t command );                     // send high nibble only (wake-up)
