@@ -22,8 +22,8 @@
  * function : MOTOR_Config( )
  * INs      : none
  * OUTs     : none
- * action   : configures PC8 as general purpose push-pull output, no pull,
- *            high speed; presets pin low (LED off)
+ * action   : configures PC0-3 & PA0-3 as general purpose push-pull output, no pull,
+ *            high speed; presets motor controls low
  * authors  : Facundo Soto-Wang
  * version  : 0.1
  * date     : 4/22/2026
@@ -63,4 +63,7 @@ void Motor_Config(void){
 	M1_PORT -> BRR     |=  (0xF);  
   M2_PORT -> BRR     |=  (0xF);
 }
-	
+
+void Spin_Motor(void){
+  
+}
