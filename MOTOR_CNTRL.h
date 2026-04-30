@@ -39,7 +39,7 @@
 #define COILS         0xF          // Pins 0-3 (one for each motor coil)
 
 /* Motor control sequence array */
-#define Motor_Drive [0x7, 0x3, 0xB, 0x9, 0xD, 0xC, 0xE, 0x6]
+#define Motor_Drive [0b1000, 0b1100, 0b0100, 0x0110, 0b0010, 0b0011, 0b0001, 0b1001]
 /* lcd.c function declarations */
 void Motor_Config( void );                                    // configure PC8 as LED output
 void Spin_360_Motor( void );   
