@@ -17,7 +17,8 @@
  */
 
 #include "MOTOR_CNTRL.h"
-
+#include <stdio.h>
+#include "delay.h"
 /*-----------------------------------------------------------------------------
  * function : MOTOR_Config( )
  * INs      : none
@@ -62,6 +63,25 @@ void Motor_Config(void){
   // preset both motors off
 	M1_PORT -> BRR     |=  (0xF);  
   M2_PORT -> BRR     |=  (0xF);
+}
+
+void Step(int port){
+  for (int i = 0; i < 8; i++) {
+    delay_us(1000);
+    switch(port){
+      case 1:
+        M1_PORT -> BSRR |= Motor_Drive[i];
+        break;
+
+      case 2:
+        M2_PORT -> BSRR |= Motor_Drive[i];
+        break;
+
+      default: 
+        ; //do nothing if input is not acceptable
+        break;
+    }//end of switch cases
+  }
 }
 
 void Spin_360_Motor(void){

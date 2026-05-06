@@ -43,7 +43,8 @@
 /* lcd.c function declarations */
 void Motor_Config( void );                                    // configure PC8 as LED output
 void Spin_360_Motor( void );   
-void Spin_90_Motor( void )                                   // initialize LCD in 4-bit mode
+void Spin_90_Motor( void );
+void Step(int port);                                  // initialize LCD in 4-bit mode
 
 
 #endif /* INC_LCD_H_ */
