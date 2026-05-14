@@ -22,6 +22,7 @@ extern "C" {
 #include "stm32f4xx_hal.h"
 #include "delay.h"
 #include "MOTOR_CNTRL.h"
+#include "UART.h"
 
 void Error_Handler(void);
 

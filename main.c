@@ -29,6 +29,7 @@ int main(void)
   while (1)
   {
     Step(1);
+    ADC_Send(0x888);
   }
 
 }

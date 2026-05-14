@@ -84,10 +84,18 @@ void Step(int port){
   }
 }
 
-void Spin_360_Motor(void){
-
+void Spin_360_Motor(int port){
+  uint16_t step_cnt=254;//number of steps for full rotation
+  while(step_cnt>0){
+    Step(port);
+    step_cnt--;
+  }
 }
 
-void Spin_90_Motor(void){
-
+void Spin_90_Motor(int port){
+  uint16_t step_cnt=64; //number of steps for 90 degree turn
+  while(step_cnt>0){
+    step(port);
+    step_cnt--;
+  }
 }
