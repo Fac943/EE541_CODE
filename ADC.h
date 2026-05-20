@@ -9,7 +9,7 @@
 #define INC_ADC_H_
 
 void ADC_init(void);
-void ADC1_2_IRQHandler(void);
+void Sample_Angle(void);
 
 extern volatile uint16_t ADC_Samples [20];
 extern volatile uint16_t ADC_SampleCount;

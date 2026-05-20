@@ -32,12 +32,20 @@ int main(void)
 
   while (1)
   {
-    uint8_t step_cnt=0;
+    uint8_t step_cnt=254;
     while(step_cnt>0;){
       Step(1);
       step_cnt--;
-      char ADC_data = ;
-      LPUART_Send();
+      //make this a function below call it filter or something
+      uint8_t Sample_cnt=0;
+      uint16_t Samples [20];
+      while(Sample_cnt<20){
+        char ADC_data = Sample_Angle(Sample_cnt);
+        Samples [Sample_cnt] =ADC_data;
+        Sample_cnt++;		 //increment to next sample
+      }		
+      //add function to filter data from above into one final value
+      LPUART_Send(); //send filter data 
     //send adc data
     }
   }
