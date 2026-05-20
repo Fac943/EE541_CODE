@@ -23,6 +23,7 @@ extern "C" {
 #include "delay.h"
 #include "MOTOR_CNTRL.h"
 #include "UART.h"
+#include "timer.h"
 
 void Error_Handler(void);
 

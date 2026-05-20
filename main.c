@@ -1,9 +1,13 @@
 /*
-* EE 329 A4 Part D - Reaction Timer Application
+* EE541 Antenna Measurement System
 *******************************************************************************
 * @file           : main.c
-* @brief          : Reaction timer using PBSW, LED, TIM2, RNG, and LCD
-* project         : EE 329 S'26 A4
+* @brief          : Samples antenna voltage n times per motor step
+                    Samples are averaged sent over UART to matlab
+                    Data is stored in a table of voltage vs angle
+                    Data is plotted 
+                    does this process twice, one for E-plane, one for H-plane
+* project         : EE541 S'26 
 * authors         : Facundo Soto-Wang
 * version         : 0.1
 * date            : 2026-04-30
@@ -12,8 +16,8 @@
 * clocks          : 4 MHz MSI to AHB2
 * @attention      : (c) 2026 STMicroelectronics.  All rights reserved.
 *******************************************************************************
-* WIRING
-
+* Wiring:
+*
 *******************************************************************************
 */
 #include "main.h"
@@ -28,8 +32,14 @@ int main(void)
 
   while (1)
   {
-    Step(1);
-    ADC_Send(0x888);
+    uint8_t step_cnt=0;
+    while(step_cnt>0;){
+      Step(1);
+      step_cnt--;
+      char ADC_data = ;
+      LPUART_Send();
+    //send adc data
+    }
   }
 
 }
