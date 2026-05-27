@@ -19,7 +19,7 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f4xx_hal.h"
+#include "stm32l4xx_hal.h"
 #include "delay.h"
 #include "MOTOR_CNTRL.h"
 #include "UART.h"

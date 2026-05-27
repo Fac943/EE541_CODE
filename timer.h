@@ -33,7 +33,6 @@
 
 /*timer.c function declarations*/
 void setup_TIM2( int iDutyCycle );
-void TIME_PIN_CONFIG(void);
 void TIM2_IRQHandler(void);
 void setup_MCO_CLK(void);
 #endif /* INC_TIMER_H_ */

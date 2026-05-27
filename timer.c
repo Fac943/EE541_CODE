@@ -21,16 +21,6 @@
  */
 #include "timer.h"
 
-void TIME_PIN_CONFIG(void){
-    TIMER_PORT -> MODER   &= ~(GPIO_MODER_MODE0 | GPIO_MODER_MODE1);    // clear mode bits PC0
-	TIMER_PORT -> MODER   |=  (GPIO_MODER_MODE0_0 | GPIO_MODER_MODE1_0);// set PC0 as GP output
-	TIMER_PORT -> OTYPER  &= ~(GPIO_OTYPER_OT0 | GPIO_OTYPER_OT1);      // push-pull output
-	TIMER_PORT -> PUPDR   &= ~(GPIO_PUPDR_PUPD0 | GPIO_PUPDR_PUPD1);    // no pull-up/pull-down
-	TIMER_PORT -> OSPEEDR |=  (3 << GPIO_OSPEEDR_OSPEED0_Pos 
-                              |3 << GPIO_OSPEEDR_OSPEED1_Pos);          // very high speed
-	TIMER_PORT -> BRR     |=  (TIMER_PIN | ISR_MEAS_PIN);               // preset output low
-}   
-
 //function provided by EE329 lab manual 
 void setup_TIM2( int iDutyCycle ) {
     RCC->APB1ENR1 |= RCC_APB1ENR1_TIM2EN;           // enable clock for TIM2

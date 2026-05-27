@@ -33,7 +33,7 @@ int main(void)
   while (1)
   {
     uint8_t step_cnt=254;
-    while(step_cnt>0;){
+    while(step_cnt>0){
       Step(1);
       step_cnt--;
       //make this a function below call it filter or something
