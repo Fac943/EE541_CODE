@@ -22,16 +22,18 @@
 #define INC_TIMER_H_
 
 #include "stm32l4xx_hal.h"
-#include "delay.h"
 
 //define function parameters
-#define BUTTON_PRESS ( ((~GPIOC->IDR) >> 13) & 0x1 ) //bool to check button press
-#define BUTTON_PORT GPIOC
+#define PERIOD 0xFFFFFFFF  // run TIM2 continuously 
+#define DUTYCYCLE 400      //for 50% duty cycle @5kHz
+
+#define TIMER_PORT GPIOE
+#define TIMER_PIN    0x1   //PE0
+#define ISR_MEAS_PIN 0x2   //PE1
 
 /*timer.c function declarations*/
 void setup_TIM2( int iDutyCycle );
-void WAIT_FOR_BUTTON_PRESS(void);
-void CONFIG_RNG(void);
-void BUTTON_CONFIG(void);
-
+void TIME_PIN_CONFIG(void);
+void TIM2_IRQHandler(void);
+void setup_MCO_CLK(void);
 #endif /* INC_TIMER_H_ */
