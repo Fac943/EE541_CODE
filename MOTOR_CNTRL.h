@@ -3,12 +3,9 @@
  * EE 541 Antenna Measurement System
  *******************************************************************************
  * @file           : lcd.h
- * @brief          : header file for lcd.c; contains function prototypes for
- * LCD and LED configuration, initialization, and display functions; defines
- * for LCD control pin masks, data bit mask, and port assignments for
- * NHD-0216HZ-FSW-FBW-33V3C 2x16 character LCD in 4-bit parallel mode
+ * @brief          : header file for MOTOR_CNTRL.h
  * project         : EE 329 S'26 A3
- * authors         : Alex Tauber
+ * authors         : Facundo Soto-Wang
  * version         : 0.1
  * date            : 260415
  * compiler        : STM32CubeIDE v.1.19.0 Build: 14980_20230301_1550 (UTC)
@@ -16,9 +13,9 @@
  * clocks          : 4 MHz MSI to AHB2
  * @attention      : (c) 2026 STMicroelectronics.  All rights reserved.
  *******************************************************************************
- * PIN ASSIGNMENTS 
+ * PIN ASSIGNMENTS
  *      signal      – ODR bit mask – pin
- * MOTOR1           – 0x0F         – PC0-PC3  (4-phases) 
+ * MOTOR1           – 0x0F         – PC0-PC3  (4-phases)
  * MOTOR2           – 0x0F         – PA0-PA3  (4-phases)
 
  *******************************************************************************
@@ -30,21 +27,21 @@
 
 #include "stm32l4xx_hal.h"
 #include <string.h>
+#include <stdio.h>
+#include "delay.h"
 
 /* port assignments */
 #define M1_PORT GPIOC              // Motor 1 port
-#define M2_PORT GPIOA              // Motor 2 port
+#define M2_PORT GPIOF              // Motor 2 port
 
 /* Motor control pin masks (ODR/BSRR bit values) */
-#define COILS         0xF          // Pins 0-3 (one for each motor coil)
+#define COILS 0xF          // Pins 0-3 (one for each motor coil)
 
-/* Motor control sequence array */
-#define Motor_Drive [0b1000, 0b1100, 0b0100, 0x0110, 0b0010, 0b0011, 0b0001, 0b1001]
 /* lcd.c function declarations */
-void Motor_Config( void );                                    // configure PC8 as LED output
-void Spin_360_Motor( void );   
-void Spin_90_Motor( void );
-void Step(int port);                                  // initialize LCD in 4-bit mode
-
+void Motor_Config( void );
+void Spin_90_Motor( int port );
+void Step(int port);
+void Step_Reverse(int port);
+void Spin_90_Motor_Reverse(int port);
 
 #endif /* INC_LCD_H_ */

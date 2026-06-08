@@ -1,11 +1,11 @@
 /*
  *******************************************************************************
- * EE 329 A8 ADC
+ * EE541
  *******************************************************************************
  * @file           : UART.c
  * @brief          : Src file for UART code
- * project         : EE 329 S'26 A8
- * authors         : Facundo Soto-Wang & Samuel Weston
+ * project         : EE541
+ * authors         : Facundo Soto-Wang
  * version         : 0.2
  * date            : 04/24/2026
  * compiler        : STM32CubeIDE v.1.19.0 Build: 14980_20230301_1550 (UTC)
@@ -20,13 +20,6 @@
  */
 
 #include "UART.h"
-
-uint8_t USER_FLAG = 0; //user flag to transition between screens
-uint8_t it_count = 0;
-uint8_t volatile Cursor_x = 0;
-uint8_t volatile Cursor_y = 0;
-uint8_t volatile red_timer = 0;
-
 
 /*-----------------------------------------------------------------------------
  * function : UART1_INIT();
@@ -66,31 +59,10 @@ void UART1_INIT(void) {
 }
 
 /*-----------------------------------------------------------------------------
- * function : LPUART_Print();
- * INs      : string enclosed in ""
- * OUTs     : none
- * action   : prints string at cursor position in terminal 
- * authors  : Facundo Soto-Wang
- * version  : 0.1
- * date     : 260523
- * usage    : called by main.c
- *----------------------------------------------------------------------------*/
-void LPUART_Print(const char *message) {
-	uint16_t iStrIdx = 0;
-	while (message[iStrIdx] != 0) {
-		while (!(LPUART1->ISR & USART_ISR_TXE))
-			// wait for empty xmit buffer
-			;
-		LPUART1->TDR = message[iStrIdx];       // send this character
-		iStrIdx++;                             // advance index to next char
-	}
-}
-
-/*-----------------------------------------------------------------------------
  * function : UART1_Print_Char();
  * INs      : single character enclosed in ''
  * OUTs     : none
- * action   : prints single character to terminal 
+ * action   : prints single character to terminal
  * authors  : Facundo Soto-Wang
  * version  : 0.1
  * date     : 260523
@@ -103,178 +75,41 @@ void UART_Print_Char(char c) {
 }
 
 /*-----------------------------------------------------------------------------
- * function : LPUART_MOVE_CURSOR();
- * INs      : single character enclosed in ''
- * OUTs     : none
- * action   : moves cursor desired distance "forward", "back", "down" or "up" 
- * 			  n times then prints desired test at cursor position
- * authors  : Facundo Soto-Wang
- * version  : 0.1
- * date     : 260523
- * usage    : called by LPUART_PRINT_ADC, LPUART_UPDATE_VOLTS
- *----------------------------------------------------------------------------*/
-void LPUART_MOVE_CURSOR(int command, char *n) {
-	UART_Print_Char('\x1b');
-	UART_Print_Char('[');
-	LPUART_Print(n);
-	switch (command) {
-	case up:
-		LPUART_Print("A");
-		break;
-
-	case down:
-		LPUART_Print("B");
-		break;
-
-	case forward:
-		LPUART_Print("C");
-		break;
-
-	case back:
-		LPUART_Print("D");
-		break;
-	}
-
-}
-
-/*-----------------------------------------------------------------------------
- * function : LPUART_PrintVolts();
- * INs      : 16b ADC voltage
- * OUTs     : none
- * action   : prints voltage in form of X.XXX at cursor position
- * authors  : Facundo Soto-Wang
- * version  : 0.1
- * date     : 260523
- * usage    : called by LPUART_UPDATE_VOLTS
- *----------------------------------------------------------------------------*/
-void LPUART_PrintVolts(uint16_t ADC_mV) {
-	uint16_t Volts = ADC_mV / 1000;
-	uint16_t milVolts = ADC_mV % 1000;
-	UART_Print_Char(Volts + '0'); 						//print ones place (V)
-	UART_Print_Char('.');         						//print decimal point
-	UART_Print_Char((milVolts / 100) + '0'); //print hundreds place (mV)
-	UART_Print_Char(((milVolts / 10) % 10) + '0');  //print tens place (mV)
-	UART_Print_Char((milVolts % 10) + '0');			//print ones place (mV)
-}
-
-/*-----------------------------------------------------------------------------
- * function : LPUART_PrintHEX();
+ * function : LPUART_Send_ADC_Bytes();
  * INs      : 16b ADC data
  * OUTs     : none
- * action   : prints data in hex at cursor position in terminal 
+ * action   : sends 16b ADC data over UART to matlab for processing
  * authors  : Facundo Soto-Wang
  * version  : 0.1
  * date     : 260523
- * usage    : called by LPUART_UPDATE_VOLTS
+ * usage    : called by main.c
  *----------------------------------------------------------------------------*/
-void LPUART_PrintHEX(uint16_t ADC_mV){
-
+void LPUART_Send_ADC_Bytes(uint16_t ADC_Count){
+   while(!(LPUART1->ISR & USART_ISR_TXE));
+   LPUART1->TDR = ADC_Count & 0xFF;
+   while(!(LPUART1->ISR & USART_ISR_TXE));
+   LPUART1->TDR = (ADC_Count >> 8) & 0xFF;
 }
 
 /*-----------------------------------------------------------------------------
- * function : LPUART_PRINT_ADC();
+ * function : LPUART_Send_Header();
  * INs      : none
  * OUTs     : none
- * action   : prints initial splash for displaying ADC data
+ * action   : sends 16b header to signal end of first measurement cycle
  * authors  : Facundo Soto-Wang
  * version  : 0.1
  * date     : 260523
  * usage    : called by main.c
  *----------------------------------------------------------------------------*/
-void LPUART_PRINT_ADC(void) {
-	LPUART_Print(RESET);
-	LPUART_Print(HOME);
-	LPUART_Print(CLEAR_ATT);
-	LPUART_Print(INVIS);
-
-	LPUART_MOVE_CURSOR(down, "8");
-	LPUART_MOVE_CURSOR(forward, "24");
-	LPUART_Print("|----|----|----|----|----|----|");
-
-	LPUART_Print(HOME);
-	LPUART_MOVE_CURSOR(down, "9");
-	LPUART_MOVE_CURSOR(forward, "24");
-	LPUART_Print("0   0.5  1.0  1.5  2.0  2.5  3.0");
-
-	LPUART_Print(HOME);
-	LPUART_MOVE_CURSOR(down, "11");
-	LPUART_MOVE_CURSOR(forward, "31");
-	LPUART_Print("ADC counts volts");
-
-	LPUART_Print(HOME);
-	LPUART_MOVE_CURSOR(down, "12");
-	LPUART_MOVE_CURSOR(forward, "31");
-	LPUART_Print("MIN  XXXX  X.XXX V");
-
-	LPUART_Print(HOME);
-	LPUART_MOVE_CURSOR(down, "13");
-	LPUART_MOVE_CURSOR(forward, "31");
-	LPUART_Print("MAX  XXXX  X.XXX V");
-
-	LPUART_Print(HOME);
-	LPUART_MOVE_CURSOR(down, "14");
-	LPUART_MOVE_CURSOR(forward, "31");
-	LPUART_Print("AVG  XXXX  X.XXX V");
-
-	LPUART_Print(HOME);
-	LPUART_MOVE_CURSOR(down, "15");
-	LPUART_MOVE_CURSOR(forward, "29");
-	LPUART_Print("coil current = X.XXX A");
-}
-
-/*-----------------------------------------------------------------------------
- * function : LPUART_UPDATE_VOLTS();
- * INs      : 16b ADC min, avg, max voltages
- * OUTs     : none
- * action   : updates ADC values in splash screen table and bar graph
- * authors  : Facundo Soto-Wang
- * version  : 0.1
- * date     : 260523
- * usage    : called by main.c
- *----------------------------------------------------------------------------*/
-void LPUART_UPDATE_VOLTS(uint16_t min, uint16_t avg, uint16_t max) {
-	LPUART_Print(HOME);
-	LPUART_MOVE_CURSOR(down, "7");
-	LPUART_MOVE_CURSOR(forward, "24");
-
-	//update bar based on average voltage value
-	if (avg > 3000) {		   //maxed out voltage
-		LPUART_Print("###############################");
-	} else if (avg < 100) {   //voltage = 0
-		LPUART_Print("#");
-		LPUART_Print("                             ");
-	} else {                  //for voltages between 0-3V
-		uint8_t Bar_Length = (avg / 100);   //calculate length of bar
-		uint8_t Empty = (31 - Bar_Length);  //spaces needed to clear unused bar
-		LPUART_Print("#");
-		while (Bar_Length > 0) {
-			LPUART_Print("#");
-			Bar_Length--;
-		}
-		while (Empty > 0) {
-			LPUART_Print(" ");
-			Empty--;
-		}
-	}
-	//display voltages
-	LPUART_Print(HOME);
-	LPUART_MOVE_CURSOR(down, "12");
-	LPUART_MOVE_CURSOR(forward, "42");
-	LPUART_PrintVolts(min);
-
-	LPUART_Print(HOME);
-	LPUART_MOVE_CURSOR(down, "13");
-	LPUART_MOVE_CURSOR(forward, "42");
-	LPUART_PrintVolts(avg);
-
-	LPUART_Print(HOME);
-	LPUART_MOVE_CURSOR(down, "14");
-	LPUART_MOVE_CURSOR(forward, "42");
-	LPUART_PrintVolts(max);
-
-	uint16_t Current = (avg / RES);
-	LPUART_Print(HOME);
-	LPUART_MOVE_CURSOR(down, "15");
-	LPUART_MOVE_CURSOR(forward, "44");
-	LPUART_PrintVolts(Current);
+void LPUART_Send_Header(void){
+   uint16_t Header1 = 0xAAAA;
+   uint16_t Header2 = 0x5555;
+   while(!(LPUART1->ISR & USART_ISR_TXE));
+   LPUART1->TDR = Header1 & 0xFF;
+   while(!(LPUART1->ISR & USART_ISR_TXE));
+   LPUART1->TDR = (Header1 >> 8) & 0xFF;
+   while(!(LPUART1->ISR & USART_ISR_TXE));
+   LPUART1->TDR = Header2 & 0xFF;
+   while(!(LPUART1->ISR & USART_ISR_TXE));
+   LPUART1->TDR = (Header2 >> 8) & 0xFF;
 }

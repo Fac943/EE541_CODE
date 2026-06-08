@@ -1,93 +1,109 @@
 /*
-* EE541 Antenna Measurement System
-*******************************************************************************
-* @file           : main.c
-* @brief          : Samples antenna voltage n times per motor step
-                    Samples are averaged sent over UART to matlab
-                    Data is stored in a table of voltage vs angle
-                    Data is plotted 
-                    does this process twice, one for E-plane, one for H-plane
-* project         : EE541 S'26 
-* authors         : Facundo Soto-Wang
-* version         : 0.1
-* date            : 2026-04-30
-* compiler        : STM32CubeIDE v.1.19.0
-* target          : NUCLEO-L4A6ZG
-* clocks          : 4 MHz MSI to AHB2
-* @attention      : (c) 2026 STMicroelectronics.  All rights reserved.
-*******************************************************************************
-* Wiring:
-*
-*******************************************************************************
-*/
+ * EE541 Antenna Measurement System
+ *******************************************************************************
+ * @file           : main.c
+ * @brief          : Samples antenna voltage n times per motor step
+ Samples are averaged sent over UART to matlab
+ Data is stored in a table of voltage vs angle
+ Data is plotted
+ does this process twice, one for E-plane, one for H-plane
+ * project         : EE541 S'26
+ * authors         : Facundo Soto-Wang
+ * version         : 0.1
+ * date            : 2026-04-30
+ * compiler        : STM32CubeIDE v.1.19.0
+ * target          : NUCLEO-L4A6ZG
+ * clocks          : 4 MHz MSI to AHB2
+ * @attention      : (c) 2026 STMicroelectronics.  All rights reserved.
+ *******************************************************************************
+ * Wiring:
+ *
+ *******************************************************************************
+ */
 #include "main.h"
 
 void SystemClock_Config(void);
 
-int main(void)
-{
-  HAL_Init();
+int main(void) {
+	HAL_Init();
+	SystemClock_Config();
+	SysTick_Init();
+	ADC_init();
+	UART1_INIT();
+	PBSW_GPIO_Init();
+	Motor_Config();
 
-  SystemClock_Config();
+	while (1) {
+		while(!(PBSW_WaitForPress()))
+		{
+		    ;
+		}
 
-  while (1)
-  {
-    uint8_t step_cnt=254;
-    while(step_cnt>0){
-      Step(1);
-      step_cnt--;
-      //make this a function below call it filter or something
-      uint8_t Sample_cnt=0;
-      uint16_t Samples [20];
-      while(Sample_cnt<20){
-        char ADC_data = Sample_Angle(Sample_cnt);
-        Samples [Sample_cnt] =ADC_data;
-        Sample_cnt++;		 //increment to next sample
-      }		
-      //add function to filter data from above into one final value
-      LPUART_Send(); //send filter data 
-    //send adc data
-    }
-  }
+		/* ==========================
+		 AZIMUTH SWEEP
+		 ========================== */
 
+		LPUART_Send_Header();
+
+		MeasureAndTransmitSweep();
+
+		while(!(PBSW_WaitForPress()))
+				{
+				    ;
+				}
+
+
+		/* ==========================
+		 ELEVATION SWEEP
+		 ========================== */
+
+		LPUART_Send_Header();
+
+		MeasureAndTransmitSweep();
+
+		/* Return to waiting state */
+	}
 }
 
+/**
+ * @brief System Clock Configuration
+ * @retval None
+ */
+void SystemClock_Config(void) {
+	RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
+	RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };
 
-void SystemClock_Config(void)
-{
-  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+	/** Configure the main internal regulator output voltage
+	 */
+	if (HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1)
+			!= HAL_OK) {
+		Error_Handler();
+	}
 
-  /** Configure the main internal regulator output voltage
-  */
-  __HAL_RCC_PWR_CLK_ENABLE();
-  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE3);
+	/** Initializes the RCC Oscillators according to the specified parameters
+	 * in the RCC_OscInitTypeDef structure.
+	 */
+	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_MSI;
+	RCC_OscInitStruct.MSIState = RCC_MSI_ON;
+	RCC_OscInitStruct.MSICalibrationValue = 0;
+	RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_6;
+	RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+	if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
+		Error_Handler();
+	}
 
-  /** Initializes the RCC Oscillators according to the specified parameters
-  * in the RCC_OscInitTypeDef structure.
-  */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
-  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-  {
-    Error_Handler();
-  }
+	/** Initializes the CPU, AHB and APB buses clocks
+	 */
+	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
+			| RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_MSI;
+	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  /** Initializes the CPU, AHB and APB buses clocks
-  */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
-
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
-  {
-    Error_Handler();
-  }
+	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK) {
+		Error_Handler();
+	}
 }
 
 /* USER CODE BEGIN 4 */
@@ -95,18 +111,16 @@ void SystemClock_Config(void)
 /* USER CODE END 4 */
 
 /**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
-void Error_Handler(void)
-{
-  /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
-  __disable_irq();
-  while (1)
-  {
-  }
-  /* USER CODE END Error_Handler_Debug */
+ * @brief  This function is executed in case of error occurrence.
+ * @retval None
+ */
+void Error_Handler(void) {
+	/* USER CODE BEGIN Error_Handler_Debug */
+	/* User can add his own implementation to report the HAL error return state */
+	__disable_irq();
+	while (1) {
+	}
+	/* USER CODE END Error_Handler_Debug */
 }
 
 #ifdef  USE_FULL_ASSERT

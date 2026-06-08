@@ -1,10 +1,10 @@
 /*
  *******************************************************************************
- * EE 329 A8 NUCLEO ADC & Current Source
+ * EE541 ADC
  *******************************************************************************
  * @file           : ADC.h
  * @brief          : Header file for ADC.c
- * authors         : Facundo Soto-Wang & Samuel Weston.
+ * authors         : Facundo Soto-Wang
  * version         : 0.1
  * date            : 260526
  * compiler        : STM32CubeIDE v.1.19.0 Build: 14980_20230301_1550 (UTC)
@@ -23,14 +23,14 @@
 
 #define VREF        3300    	// Reference voltage (mV)
 #define ADC_MAX     4095    	// 12-bit max (2^12 - 1)
-#define M           1000    	// slope of uncalibrated DAC (mV)
+#define M           1000    	// slope of uncalibrated DAC (mV/mV)
 #define B           0   	   // y intercept of uncalibrated DAC (mV)
 
 void ADC_init(void);
 uint16_t Conv_ADC(void);
-uint16_t Get_Min(uint16_t ADC_Samples[]);
-uint16_t Get_Avg(uint16_t ADC_Samples[]);
-uint16_t Get_Max(uint16_t ADC_Samples[]);
+uint16_t Get_Min(uint16_t ADC_Samples[], uint8_t size);
+uint16_t Get_Max(uint16_t ADC_Samples[], uint8_t size);
+uint16_t ADC_filter(uint16_t ADC_Samples[], uint8_t size);
 void ADC1_2_IRQHandler(void);
 
 extern volatile uint16_t ADC_sample;

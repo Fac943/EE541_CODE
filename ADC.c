@@ -1,11 +1,11 @@
 /*
  *******************************************************************************
- * EE 329 A8 NUCLEO ADC & Current Source
+ * EE541 Antenna Measurement System
  *******************************************************************************
  * @file           : ADC.c
  * @brief          : Inits ADC1 in port A, functions to read data from PA0
  * project         : EE 329 S'26 A8
- * authors         : Facundo Soto-Wang & Samuel Weston.
+ * authors         : Facundo Soto-Wang
  * version         : 0.1
  * date            : 260523
  * compiler        : STM32CubeIDE v.1.19.0 Build: 14980_20230301_1550 (UTC)
@@ -82,11 +82,8 @@ void ADC_init(void){
  * usage    : called by ADC1_2_IRQHandler
  *----------------------------------------------------------------------------*/
 uint16_t Conv_ADC(void){
-   uint16_t ADC_Data = ADC1->DR;              // Read data register
-   uint32_t milvolts = ((uint32_t)ADC_Data*VREF)/ADC_MAX;  //convert to mV
-   milvolts = ((M*milvolts)/1000);  //account for calibrated slope
-   milvolts = (milvolts + B);                  //account for offset
-   return (uint16_t)milvolts;
+   uint16_t ADC_Data = ADC1->DR;
+   return ADC_Data;
 }
 
 /*-----------------------------------------------------------------------------
@@ -99,9 +96,9 @@ uint16_t Conv_ADC(void){
  * date     : 260523
  * usage    : called by main.c
  *----------------------------------------------------------------------------*/
-uint16_t Get_Min(uint16_t ADC_Samples[]){
+uint16_t Get_Min(uint16_t ADC_Samples[], uint8_t size){
    uint16_t Min_volts = ADC_Samples[0];
-   for(uint8_t i = 1; i < 20; i++){
+   for(uint8_t i = 1; i < size; i++){
       if(ADC_Samples[i] < Min_volts){
          Min_volts = ADC_Samples[i];
       }
@@ -119,14 +116,19 @@ uint16_t Get_Min(uint16_t ADC_Samples[]){
  * date     : 260523
  * usage    : called by main.c
  *----------------------------------------------------------------------------*/
-uint16_t Get_Avg(uint16_t ADC_Samples[]){
-   uint32_t Sum_volts = 0;
-   uint16_t Avg_volts = 0;
-   for(uint8_t i = 0; i < 20; i++){
-   	Sum_volts += ADC_Samples[i];
-   }
-   Avg_volts = Sum_volts / 20;
-   return Avg_volts;
+uint16_t ADC_filter(uint16_t ADC_Samples[], uint8_t size){
+   //uint32_t Sum_volts = 0;
+   //uint16_t Avg_volts = 0;
+   //for(uint8_t i = 0; i < size; i++){
+   	//Sum_volts += ADC_Samples[i];
+   //}
+
+   uint16_t max_volts = Get_Max(ADC_Samples, size);
+   //uint16_t min_volts = Get_Min(ADC_Samples, size);
+
+   //throw out outliers and average
+   //Avg_volts = ((uint32_t)(Sum_volts-(min_volts+ max_volts)) / (size-2));
+   return (uint16_t)max_volts;
 }
 
 /*-----------------------------------------------------------------------------
@@ -139,9 +141,9 @@ uint16_t Get_Avg(uint16_t ADC_Samples[]){
  * date     : 260523
  * usage    : called by main.c
  *----------------------------------------------------------------------------*/
-uint16_t Get_Max(uint16_t ADC_Samples[]){
+uint16_t Get_Max(uint16_t ADC_Samples[], uint8_t size){
    uint16_t Max_volts = ADC_Samples[0];
-   for(uint8_t i = 1; i < 20; i++){
+   for(uint8_t i = 1; i < size; i++){
       if(ADC_Samples[i] > Max_volts){
          Max_volts = ADC_Samples[i];
       }
