@@ -1,6 +1,6 @@
 % EE541 ANTENNA RADIATION PATTERN MEASUREMENT SYSTEM
 % Facundo Soto-Wang
-% AI assisted in creation of 3D interpolation of 2D radiation pattern
+% AI assisted in creation of 3D interpolation of 2D radiation pattern and IIR filter
 
 clear;
 clc;
